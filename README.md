@@ -2,8 +2,8 @@
 
 Application simple de gestion des inscriptions d'étudiants avec validation des données et tests automatisés.
 
-[![Build Status](https://travis-ci.com/votre-compte/inscription_etudiants.svg?branch=main)](https://travis-ci.com/votre-compte/inscription_etudiants)
-[![Coverage Status](https://coveralls.io/repos/github/votre-compte/inscription_etudiants/badge.svg)](https://coveralls.io/github/votre-compte/inscription_etudiants)
+[![Tests](https://github.com/mahamanenassirougarbasidik-glitch/inscription-etudiants/actions/workflows/ci.yml/badge.svg)](https://github.com/mahamanenassirougarbasidik-glitch/inscription-etudiants/actions/workflows/ci.yml)
+[![Coverage Status](https://coveralls.io/repos/github/mahamanenassirougarbasidik-glitch/inscription-etudiants/badge.svg)](https://coveralls.io/github/mahamanenassirougarbasidik-glitch/inscription-etudiants)
 
 ## Fonctionnalités
 - Ajouter un étudiant (nom, email, âge, numéro étudiant)
