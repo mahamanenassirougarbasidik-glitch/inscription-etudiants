@@ -25,5 +25,12 @@ jobs:
     - name: Installer les dépendances
       run: pip install -r requirements.txt
 
-    - name: Lancer les tests
-      run: pytest --cov=src
+    # Ajout du répertoire courant au PYTHONPATH pour que 'src' soit trouvable
+    - name: Lancer les tests avec couverture
+      run: |
+        export PYTHONPATH=$PYTHONPATH:$(pwd)
+        pytest --cov=src
+
+    # Optionnel : afficher la couverture
+    - name: Afficher le rapport de couverture
+      run: coverage report
