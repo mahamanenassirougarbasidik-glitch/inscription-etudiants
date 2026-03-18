@@ -88,6 +88,14 @@ def test_ajout_etudiant_invalide(nom, email, age, numero, message_erreur):
     with pytest.raises(ValueError, match=message_erreur):
         systeme.ajouter_etudiant(nom, email, age, numero)
 
+# Avant (test qui réussit)
+def test_ajout_etudiant_valide(systeme_vide):
+    etudiant = systeme_vide.ajouter_etudiant("Jean", "jean@test.fr", 20, "2025001")
+    assert etudiant['age'] == 20   # OK
+    
+    def test_ajout_etudiant_valide(systeme_vide):
+    etudiant = systeme_vide.ajouter_etudiant("Jean", "jean@test.fr", 20, "2025001")
+    assert etudiant['age'] == 999   # Va échouer
 # ------------------------------------------------------------------
 # Paramétrisation pour tester plusieurs cas valides avec la liste complète
 # ------------------------------------------------------------------
