@@ -1,6 +1,10 @@
 name: Tests Python
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   test:
@@ -10,29 +14,22 @@ jobs:
         python-version: [3.8, 3.9, 3.10]
 
     steps:
-      - uses: actions/checkout@v3
+    - name: Récupérer le code
+      uses: actions/checkout@v3
 
-      - name: Afficher la structure du projet
-        run: ls -R
+    - name: Configurer Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
 
-      - name: Afficher le répertoire courant
-        run: pwd
+    - name: Installer les dépendances
+      run: pip install -r requirements.txt
 
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+    - name: Installer le package en mode développement
+      run: pip install -e .
 
-      - name: Installer les dépendances
-        run: pip install -r requirements.txt
+    - name: Lancer les tests avec couverture
+      run: pytest --cov=src
 
-      - name: Vérifier le PYTHONPATH et l'import
-        run: |
-          echo "PYTHONPATH avant : $PYTHONPATH"
-          export PYTHONPATH=$PYTHONPATH:$(pwd)
-          echo "PYTHONPATH après : $PYTHONPATH"
-          python -c "import sys; print('Chemins Python :', sys.path); from src.gestion_inscriptions import GestionInscriptions; print('✅ Import réussi')"
-
-      - name: Lancer les tests
-        run: |
-          export PYTHONPATH=$PYTHONPATH:$(pwd)
-          pytest --cov=src -v
+    - name: Afficher le rapport de couverture
+      run: coverage report
