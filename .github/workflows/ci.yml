@@ -1,10 +1,6 @@
 name: Tests Python
 
-on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+on: [push, pull_request]
 
 jobs:
   test:
@@ -14,29 +10,29 @@ jobs:
         python-version: [3.8, 3.9, 3.10]
 
     steps:
-      - name: Récupérer le code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Lister les fichiers (débogage)
-        run: ls -la
+      - name: Afficher la structure du projet
+        run: ls -R
 
       - name: Afficher le répertoire courant
         run: pwd
 
-      - name: Configurer Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Installer les dépendances
         run: pip install -r requirements.txt
 
-      - name: Vérifier l'import du module src
+      - name: Vérifier le PYTHONPATH et l'import
         run: |
+          echo "PYTHONPATH avant : $PYTHONPATH"
           export PYTHONPATH=$PYTHONPATH:$(pwd)
-          python -c "from src.gestion_inscriptions import GestionInscriptions; print('Import réussi')"
+          echo "PYTHONPATH après : $PYTHONPATH"
+          python -c "import sys; print('Chemins Python :', sys.path); from src.gestion_inscriptions import GestionInscriptions; print('✅ Import réussi')"
 
       - name: Lancer les tests
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)
-          pytest --cov=src
+          pytest --cov=src -v
