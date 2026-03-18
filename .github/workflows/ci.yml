@@ -1,20 +1,59 @@
 name: Tests Python
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8, 3.9, 3.10]
+        python-version: [3.8, 3.9, 3.10]   # Versions valides (plus de 3.1 !)
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - name: Récupérer le code
+        uses: actions/checkout@v3
+
+      - name: Afficher la structure du projet (débogage)
+        run: |
+          echo "=== Contenu racine ==="
+          ls -la
+          echo "=== Contenu de src/ ==="
+          ls -la src/ || echo "src/ n'existe pas"
+          echo "=== Contenu de tests/ ==="
+          ls -la tests/ || echo "tests/ n'existe pas"
+
+      - name: Configurer Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Installer les dépendances
-        run: pip install pytest
-      - name: Lancer le test minimal
-        run: pytest test_minimal.py -v
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Installer le package en mode développement
+        run: pip install -e .
+
+      - name: Vérifier l'import du module
+        run: |
+          python -c "
+import sys
+print('PYTHONPATH:', sys.path)
+try:
+    from src.gestion_inscriptions import GestionInscriptions
+    print('✅ Import réussi')
+except Exception as e:
+    print('❌ Erreur d import:', e)
+    exit(1)
+"
+
+      - name: Lancer les tests avec couverture
+        run: pytest --cov=src -v
+
+      - name: Afficher le rapport de couverture
+        run: coverage report
