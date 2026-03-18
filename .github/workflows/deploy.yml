@@ -1,0 +1,115 @@
+name: CD - Déploiement Automatique
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    name: Déploiement Staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    environment:
+      name: staging
+      url: https://staging.votre-app.com
+    
+    steps:
+    - name: Checkout du code
+      uses: actions/checkout@v4
+    
+    - name: Configuration de Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Installation des dépendances
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Collecte des fichiers statiques
+      run: python manage.py collectstatic --noinput
+      env:
+        DJANGO_SETTINGS_MODULE: config.settings
+    
+    - name: Déploiement vers Staging
+      run: |
+        echo "🚀 Déploiement vers l'environnement de staging..."
+        # Ajoutez ici vos commandes de déploiement
+        # Exemple pour Heroku:
+        # git push heroku-staging develop:main
+        
+        # Exemple pour un serveur SSH:
+        # rsync -avz --exclude '.git' . user@staging-server:/path/to/app/
+
+  deploy-production:
+    name: Déploiement Production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    environment:
+      name: production
+      url: https://votre-app.com
+    needs: []
+    
+    steps:
+    - name: Checkout du code
+      uses: actions/checkout@v4
+    
+    - name: Configuration de Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Installation des dépendances
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Exécution des migrations (Dry Run)
+      run: python manage.py migrate --plan
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        DJANGO_SETTINGS_MODULE: config.settings
+    
+    - name: Collecte des fichiers statiques
+      run: python manage.py collectstatic --noinput
+      env:
+        DJANGO_SETTINGS_MODULE: config.settings
+    
+    - name: Déploiement vers Production
+      run: |
+        echo "🚀 Déploiement vers l'environnement de production..."
+        # Ajoutez ici vos commandes de déploiement
+        
+    - name: Notification de succès
+      if: success()
+      run: |
+        echo "✅ Déploiement en production réussi !"
+
+  create-release:
+    name: Création d'une Release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Checkout du code
+      uses: actions/checkout@v4
+    
+    - name: Création de la release GitHub
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          ## Changements dans cette version
+          
+          - Nouvelles fonctionnalités
+          - Corrections de bugs
+          - Améliorations de performance
+        draft: false
+        prerelease: false
