@@ -14,23 +14,29 @@ jobs:
         python-version: [3.8, 3.9, 3.10]
 
     steps:
-    - name: Récupérer le code
-      uses: actions/checkout@v3
+      - name: Récupérer le code
+        uses: actions/checkout@v3
 
-    - name: Configurer Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Lister les fichiers (débogage)
+        run: ls -la
 
-    - name: Installer les dépendances
-      run: pip install -r requirements.txt
+      - name: Afficher le répertoire courant
+        run: pwd
 
-    # Ajout du répertoire courant au PYTHONPATH pour que 'src' soit trouvable
-    - name: Lancer les tests avec couverture
-      run: |
-        export PYTHONPATH=$PYTHONPATH:$(pwd)
-        pytest --cov=src
+      - name: Configurer Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    # Optionnel : afficher la couverture
-    - name: Afficher le rapport de couverture
-      run: coverage report
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Vérifier l'import du module src
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          python -c "from src.gestion_inscriptions import GestionInscriptions; print('Import réussi')"
+
+      - name: Lancer les tests
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          pytest --cov=src
